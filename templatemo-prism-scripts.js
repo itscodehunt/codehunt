@@ -184,7 +184,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let isDragging = false;
     let startPos = 0;
     let currentTranslate = 0;
-    let prevTranslate = 0;
     const threshold = 50; // Minimum distance to swipe (in pixels)
 
     function createCarouselItem(data, index) {
@@ -207,13 +206,19 @@ document.addEventListener('DOMContentLoaded', () => {
         return item;
     }
 
-    function updateCarousel() {
+    function updateCarousel(extraTranslation = 0) {
         const items = document.querySelectorAll('.carousel-item');
         const indicators = document.querySelectorAll('.indicator');
         const totalItems = items.length;
         const isMobile = window.innerWidth <= 768;
         const isTablet = window.innerWidth <= 1024;
         
+        // Apply the temporary translation to the entire carousel container
+        if (carousel) {
+            carousel.style.transform = `translateX(${extraTranslation}px)`;
+            carousel.style.transition = extraTranslation === 0 ? 'all 0.8s cubic-bezier(0.4, 0.0, 0.2, 1)' : 'none';
+        }
+
         items.forEach((item, index) => {
             let offset = index - currentIndex;
             // Handle wrap-around for the 3D effect
@@ -223,15 +228,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const absOffset = Math.abs(offset);
             const sign = offset < 0 ? -1 : 1;
 
-            // Reset transition for smooth movement after swipe/click
-            item.style.transition = 'all 0.8s cubic-bezier(0.4, 0.0, 0.2, 1)';
+            // Use the transition only when NOT dragging
+            item.style.transition = extraTranslation === 0 ? 'all 0.8s cubic-bezier(0.4, 0.0, 0.2, 1)' : 'none';
             item.style.pointerEvents = absOffset === 0 ? 'auto' : 'none'; // Only allow interaction with the center card
 
             let spacing1 = 400, spacing2 = 600, spacing3 = 750;
             if (isMobile) { spacing1 = 280; spacing2 = 420; spacing3 = 550; }
             else if (isTablet) { spacing1 = 340; spacing2 = 520; spacing3 = 650; }
 
-            // Apply 3D transformation based on offset
+            // Apply 3D transformation based on offset (no drag translation here)
             let transformStyle = '';
             let opacity = 0;
             let zIndex = 1;
@@ -277,8 +282,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function nextSlide() { currentIndex = (currentIndex + 1) % portfolioData.length; updateCarousel(); }
-    function prevSlide() { currentIndex = (currentIndex - 1 + portfolioData.length) % portfolioData.length; updateCarousel(); }
+    function nextSlide() { 
+        currentIndex = (currentIndex + 1) % portfolioData.length; 
+        updateCarousel(); 
+    }
+    function prevSlide() { 
+        currentIndex = (currentIndex - 1 + portfolioData.length) % portfolioData.length; 
+        updateCarousel(); 
+    }
     function goToSlide(index) { 
         if (index === currentIndex) return; // Prevent unnecessary update
         currentIndex = index; 
@@ -330,8 +341,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function dragStart(event) {
-        // Only allow dragging on the main carousel area, not on buttons/links inside cards
-        if (event.target.closest('.card-cta') || event.target.tagName === 'A' || event.button !== 0) return;
+        // Prevent drag when interacting with CTA button/links
+        if (event.target.closest('.card-cta') || event.target.tagName === 'A' || (event.type === 'mousedown' && event.button !== 0)) return;
 
         isDragging = true;
         startPos = getPositionX(event);
@@ -339,29 +350,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Stop auto-rotate when dragging starts
         if (autoRotateInterval) clearInterval(autoRotateInterval);
-        
-        // Apply no transition during drag for smooth, immediate movement
-        document.querySelectorAll('.carousel-item').forEach(item => {
-            item.style.transition = 'none';
-        });
     }
 
     function dragging(event) {
         if (!isDragging) return;
-
+        // Prevent default behavior (like scrolling on touch devices) only if horizontal drag is significant
+        if (event.type.includes('touch')) {
+             // We allow default scroll if the movement is primarily vertical
+             const currentPos = getPositionX(event);
+             currentTranslate = currentPos - startPos;
+             const isHorizontal = Math.abs(currentTranslate) > Math.abs(event.touches[0].clientY - startPos);
+             if (isHorizontal) {
+                 event.preventDefault(); 
+             }
+        }
+        
         const currentPos = getPositionX(event);
         currentTranslate = currentPos - startPos;
 
-        // Apply a temporary translation for visual feedback (this overrrides the 3D position temporarily)
-        // Only apply a small drag factor to make it feel like 3D movement
-        const dragFactor = 0.3; 
-        document.querySelectorAll('.carousel-item').forEach(item => {
-            const tempX = currentTranslate * dragFactor;
-            // Get current transform for item
-            const currentTransform = item.style.transform;
-            // Apply the drag *relative* to the item's original 3D position
-            item.style.transform = currentTransform + ` translateX(${tempX}px)`;
-        });
+        // Apply the temporary translation to the whole carousel container
+        // This moves the entire scene horizontally for visual feedback
+        updateCarousel(currentTranslate);
     }
 
     function dragEnd(event) {
@@ -376,14 +385,13 @@ document.addEventListener('DOMContentLoaded', () => {
             nextSlide(); // Swiped left
         } else if (movedBy > threshold) {
             prevSlide(); // Swiped right
-        } else {
-            // Revert to original position if not enough swipe
-            updateCarousel(); 
-        }
+        } 
+        
+        // Always reset the temporary carousel translation
+        updateCarousel(0); 
 
-        // Cleanup temporary styles and reset state
+        // Cleanup temporary state
         currentTranslate = 0;
-        prevTranslate = 0;
         
         // Restart auto-rotate after drag ends
         startAutoRotate();
@@ -394,15 +402,16 @@ document.addEventListener('DOMContentLoaded', () => {
         element.ondragstart = () => false; 
 
         // Touch events (for mobile/tablet)
+        // Use passive: false on touchmove to allow preventDefault if we detect horizontal drag
         element.addEventListener('touchstart', dragStart, { passive: true });
-        element.addEventListener('touchmove', dragging, { passive: true });
+        element.addEventListener('touchmove', dragging, { passive: false });
         element.addEventListener('touchend', dragEnd);
 
         // Mouse events (for desktop dragging)
         element.addEventListener('mousedown', dragStart);
-        element.addEventListener('mousemove', dragging);
-        element.addEventListener('mouseup', dragEnd);
-        element.addEventListener('mouseleave', dragEnd); // End drag if mouse leaves container
+        document.addEventListener('mousemove', dragging); // Bind mousemove to document
+        document.addEventListener('mouseup', dragEnd); // Bind mouseup to document
+        element.addEventListener('mouseleave', dragEnd); // Catch edge case
     }
 
 
@@ -447,8 +456,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Event listeners ---
-    if (nextBtn) nextBtn.addEventListener('click', nextSlide);
-    if (prevBtn) prevBtn.addEventListener('click', prevSlide);
+    if (nextBtn) nextBtn.addEventListener('click', () => { nextSlide(); resetAutoRotate(); });
+    if (prevBtn) prevBtn.addEventListener('click', () => { prevSlide(); resetAutoRotate(); });
 
     // Keyboard navigation
     document.addEventListener('keydown', (e) => {
