@@ -6,17 +6,105 @@ https://templatemo.com/tm-600-prism-flux
 
 // Static data (keep this at top)
 const portfolioData = [
-    { id: 1, title: 'CORE JAVA', description: 'Advanced AI system with deep learning capabilities for predictive analytics and pattern recognition.', image: 'images/corejava.png', tech: ['TensorFlow', 'Python', 'CUDA'] },
-    { id: 2, title: 'JDBC', description: 'Next-generation cloud infrastructure leveraging quantum computing for unprecedented processing power.', image: 'images/jdbc.png', tech: ['AWS', 'Kubernetes', 'Docker'] },
-    { id: 2, title: 'SERVLET JSP', description: 'Next-generation cloud infrastructure leveraging quantum computing for unprecedented processing power.', image: 'images/servletjsp.png', tech: ['AWS', 'Kubernetes', 'Docker'] },
-    { id: 3, title: 'HIBERNATE', description: 'Secure decentralized storage solution using advanced encryption and distributed ledger technology.', image: 'images/hibernate.png', tech: ['Ethereum', 'Solidity', 'Web3'] },
-    { id: 4, title: 'SPRING CORE', description: 'Military-grade cybersecurity framework with real-time threat detection and automated response.', image: 'images/springcore.png', tech: ['Zero Trust', 'AI Defense', 'Encryption'] },
-    { id: 2, title: 'SPRING MVC', description: 'Next-generation cloud infrastructure leveraging quantum computing for unprecedented processing power.', image: 'images/springmvc.png', tech: ['AWS', 'Kubernetes', 'Docker'] },
-    { id: 2, title: 'SPRING BOOT', description: 'Next-generation cloud infrastructure leveraging quantum computing for unprecedented processing power.', image: 'images/springboot.png', tech: ['AWS', 'Kubernetes', 'Docker'] },
-    { id: 2, title: 'SPRING SECURITY', description: 'Next-generation cloud infrastructure leveraging quantum computing for unprecedented processing power.', image: 'images/springsecurity.png', tech: ['AWS', 'Kubernetes', 'Docker'] },
-    { id: 2, title: 'SPRING REST-API', description: 'Next-generation cloud infrastructure leveraging quantum computing for unprecedented processing power.', image: 'images/restapi.png', tech: ['AWS', 'Kubernetes', 'Docker'] },
-    { id: 5, title: 'MICROSERVICES', description: 'Big data processing platform capable of analyzing petabytes of information in real-time.', image: 'images/microservices.png', tech: ['Apache Spark', 'Hadoop', 'Kafka'] },
-    { id: 7, title: 'REALTIME PROJECT', description: 'Intelligent IoT ecosystem connecting millions of devices with edge computing capabilities.', image: 'images/taxi.png', tech: ['MQTT', 'Edge AI', '5G'] }
+    { 
+        id: 1, 
+        title: 'CORE JAVA', 
+        description: 'Master object-oriented programming, data types, loops, methods, classes, and exception handling with real-world examples.', 
+        image: 'images/corejava.png', 
+        tech: ['OOP', 'Collections', 'Exceptions'] ,
+        link: 'corejava.html'
+    },
+
+    { 
+        id: 2, 
+        title: 'JDBC', 
+        description: 'Learn how to connect Java applications with databases using JDBC drivers, CRUD operations, transactions, and batch processing.', 
+        image: 'images/jdbc.png', 
+        tech: ['MySQL', 'Driver', 'Database'] ,
+         link: 'jdbc.html'
+    },
+
+    { 
+        id: 3, 
+        title: 'SERVLET & JSP', 
+        description: 'Build dynamic web applications using Servlets and JSP, session management, cookies, MVC architecture, and JSTL.', 
+        image: 'images/servletjsp.png', 
+        tech: ['Servlet', 'JSP', 'MVC'] ,
+         link: 'servletjsp.html'
+        
+    },
+
+    { 
+        id: 4, 
+        title: 'HIBERNATE', 
+        description: 'Learn ORM mapping, HQL, caching, relationships, and JPA integration to manage databases efficiently with Hibernate.', 
+        image: 'images/hibernate.png', 
+        tech: ['ORM', 'HQL', 'JPA'] ,
+         link: 'hibernate.html'
+    },
+
+    { 
+        id: 5, 
+        title: 'SPRING CORE', 
+        description: 'Understand IoC, Dependency Injection, Bean lifecycle, Autowiring, and Spring container configuration in depth.', 
+        image: 'images/springcore.png', 
+        tech: ['IoC', 'DI', 'Spring Beans'] ,
+         link: 'springcore.html'
+    },
+
+    { 
+        id: 6, 
+        title: 'SPRING MVC', 
+        description: 'Develop production-ready MVC web apps with controllers, view resolvers, form handling, validation, and REST integration.', 
+        image: 'images/springmvc.png', 
+        tech: ['Dispatcher', 'ViewResolver', 'MVC'] ,
+         link: 'springmvc.html'
+    },
+
+    { 
+        id: 7, 
+        title: 'SPRING BOOT', 
+        description: 'Create rapid production-ready applications with auto-configuration, embedded servers, and Spring Boot starters.', 
+        image: 'images/springboot.png', 
+        tech: ['RAD', 'Data JPA', 'REST API'] ,
+         link: 'springboot.html'
+    },
+
+    { 
+        id: 8, 
+        title: 'SPRING SECURITY', 
+        description: 'Implement authentication, authorization, JWT, custom filters, and secure your applications using Spring Security 5.7.', 
+        image: 'images/springsecurity.png', 
+        tech: ['JWT', 'Authentication'] ,
+         link: 'springsecurity.html'
+    },
+
+    { 
+        id: 9, 
+        title: 'SPRING REST API', 
+        description: 'Build clean RESTful services with HTTP methods, request validation, exception handling, and layered architecture.', 
+        image: 'images/restapi.png', 
+        tech: ['REST', 'JSON', 'HTTP'] ,
+         link: 'springrestapi.html'
+    },
+
+    { 
+        id: 10, 
+        title: 'MICROSERVICES', 
+        description: 'Learn microservices architecture, API gateways, service discovery, communication patterns, and deployment strategies.', 
+        image: 'images/microservices.png', 
+        tech: ['Eureka', 'Feign', 'API Gateway'] ,
+         link: 'springmicroservices.html'
+    },
+
+    { 
+        id: 11, 
+        title: 'REALTIME PROJECT', 
+        description: 'Work on a fully integrated real-time Java project including backend, REST APIs, security, and database architecture.', 
+        image: 'images/taxi.png', 
+        tech: ['Spring Boot', 'MySQL', 'JWT'] ,
+         link: 'jdbc.html'
+    }
 ];
 
 const skillsData = [
@@ -107,7 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <h3 class="card-title">${data.title}</h3>
                 <p class="card-description">${data.description}</p>
                 <div class="card-tech">${techBadges}</div>
-                <button class="card-cta" onclick="scrollToSection('about')">Explore</button>
+                <button class="card-cta" onclick="window.location.href='${data.link}'">Explore</button>
             </div>
         `;
         return item;
@@ -260,7 +348,50 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize components
     initCarousel();
     initParticles();
-    // initSkillsGrid(); // uncomment if you want skills grid active
+
+    // -------------------------------
+    // ⭐⭐⭐ SWIPE SUPPORT ADDED ⭐⭐⭐
+    // -------------------------------
+    let startX = 0;
+    let endX = 0;
+    let isDragging = false;
+
+    function handleSwipe() {
+        const diff = startX - endX;
+        if (Math.abs(diff) < 50) return;
+
+        if (diff > 50) nextSlide();   // swipe left
+        if (diff < -50) prevSlide();  // swipe right
+    }
+
+    const carouselContainer = document.getElementById("carousel");
+
+    // Mobile
+    carouselContainer.addEventListener("touchstart", (e) => {
+        startX = e.touches[0].clientX;
+    });
+
+    carouselContainer.addEventListener("touchend", (e) => {
+        endX = e.changedTouches[0].clientX;
+        handleSwipe();
+    });
+
+    // Desktop mouse drag
+    carouselContainer.addEventListener("mousedown", (e) => {
+        isDragging = true;
+        startX = e.clientX;
+    });
+
+    carouselContainer.addEventListener("mouseup", (e) => {
+        if (!isDragging) return;
+        isDragging = false;
+        endX = e.clientX;
+        handleSwipe();
+    });
+
+    carouselContainer.addEventListener("dragstart", (e) => e.preventDefault());
+    // -------------------------------
+
     // safe menu toggle
     if (menuToggle && navMenu) {
         menuToggle.addEventListener('click', () => {
@@ -313,8 +444,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Stats IntersectionObserver & fallback (mobile-friendly) ---
     const observerOptions = {
-        threshold: 0.1,                 // lower threshold for mobile
-        rootMargin: '0px 0px -50px 0px' // trigger a bit earlier
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
     };
 
     const observer = new IntersectionObserver((entries) => {
@@ -331,16 +462,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }, observerOptions);
 
-    // Accept either .stats-section (preferred) or .stats-grid (fallback)
     const statsSection = document.querySelector('.stats-section') || document.querySelector('.stats-grid');
     if (statsSection) {
         try { observer.observe(statsSection); }
         catch (err) { console.warn('Observer failed:', err); }
-    } else {
-        console.warn('Stats section/grid not found: counters will run via fallback.');
     }
 
-    // Fallback: always run counters on load (useful for mobile / if observer missed)
     window.addEventListener('load', () => {
         document.querySelectorAll('.stat-number').forEach(num => {
             if (!num.classList.contains('animated')) {
@@ -349,16 +476,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
-
-    // Optional: immediate mobile-only trigger (uncomment if you prefer instant on phones)
-    // if (window.innerWidth < 768) {
-    //     document.querySelectorAll('.stat-number').forEach(number => {
-    //         if (!number.classList.contains('animated')) {
-    //             number.classList.add('animated');
-    //             animateCounter(number);
-    //         }
-    //     });
-    // }
 
     // --- Contact form handler ---
     const contactForm = document.getElementById('contactForm');
@@ -378,7 +495,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (loader) setTimeout(() => loader.classList.add('hidden'), 1500);
     });
 
-    // Parallax hero (safe)
+    // Parallax hero
     window.addEventListener('scroll', () => {
         const scrolled = window.pageYOffset;
         const parallax = document.querySelector('.hero');
