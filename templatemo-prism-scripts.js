@@ -348,50 +348,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize components
     initCarousel();
     initParticles();
-
-    // -------------------------------
-    // ⭐⭐⭐ SWIPE SUPPORT ADDED ⭐⭐⭐
-    // -------------------------------
-    let startX = 0;
-    let endX = 0;
-    let isDragging = false;
-
-    function handleSwipe() {
-        const diff = startX - endX;
-        if (Math.abs(diff) < 50) return;
-
-        if (diff > 50) nextSlide();   // swipe left
-        if (diff < -50) prevSlide();  // swipe right
-    }
-
-    const carouselContainer = document.getElementById("carousel");
-
-    // Mobile
-    carouselContainer.addEventListener("touchstart", (e) => {
-        startX = e.touches[0].clientX;
-    });
-
-    carouselContainer.addEventListener("touchend", (e) => {
-        endX = e.changedTouches[0].clientX;
-        handleSwipe();
-    });
-
-    // Desktop mouse drag
-    carouselContainer.addEventListener("mousedown", (e) => {
-        isDragging = true;
-        startX = e.clientX;
-    });
-
-    carouselContainer.addEventListener("mouseup", (e) => {
-        if (!isDragging) return;
-        isDragging = false;
-        endX = e.clientX;
-        handleSwipe();
-    });
-
-    carouselContainer.addEventListener("dragstart", (e) => e.preventDefault());
-    // -------------------------------
-
+    // initSkillsGrid(); // uncomment if you want skills grid active
     // safe menu toggle
     if (menuToggle && navMenu) {
         menuToggle.addEventListener('click', () => {
@@ -444,8 +401,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Stats IntersectionObserver & fallback (mobile-friendly) ---
     const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
+        threshold: 0.1,                 // lower threshold for mobile
+        rootMargin: '0px 0px -50px 0px' // trigger a bit earlier
     };
 
     const observer = new IntersectionObserver((entries) => {
@@ -462,12 +419,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }, observerOptions);
 
+    // Accept either .stats-section (preferred) or .stats-grid (fallback)
     const statsSection = document.querySelector('.stats-section') || document.querySelector('.stats-grid');
     if (statsSection) {
         try { observer.observe(statsSection); }
         catch (err) { console.warn('Observer failed:', err); }
+    } else {
+        console.warn('Stats section/grid not found: counters will run via fallback.');
     }
 
+    // Fallback: always run counters on load (useful for mobile / if observer missed)
     window.addEventListener('load', () => {
         document.querySelectorAll('.stat-number').forEach(num => {
             if (!num.classList.contains('animated')) {
@@ -476,6 +437,16 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+
+    // Optional: immediate mobile-only trigger (uncomment if you prefer instant on phones)
+    // if (window.innerWidth < 768) {
+    //     document.querySelectorAll('.stat-number').forEach(number => {
+    //         if (!number.classList.contains('animated')) {
+    //             number.classList.add('animated');
+    //             animateCounter(number);
+    //         }
+    //     });
+    // }
 
     // --- Contact form handler ---
     const contactForm = document.getElementById('contactForm');
@@ -495,7 +466,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (loader) setTimeout(() => loader.classList.add('hidden'), 1500);
     });
 
-    // Parallax hero
+    // Parallax hero (safe)
     window.addEventListener('scroll', () => {
         const scrolled = window.pageYOffset;
         const parallax = document.querySelector('.hero');
