@@ -21,7 +21,7 @@ const portfolioData = [
         description: 'Learn how to connect Java applications with databases using JDBC drivers, CRUD operations, transactions, and batch processing.', 
         image: 'images/jdbc.png', 
         tech: ['MySQL', 'Driver', 'Database'] ,
-         link: 'jdbc.html'
+        link: 'jdbc.html'
     },
 
     { 
@@ -30,7 +30,7 @@ const portfolioData = [
         description: 'Build dynamic web applications using Servlets and JSP, session management, cookies, MVC architecture, and JSTL.', 
         image: 'images/servletjsp.png', 
         tech: ['Servlet', 'JSP', 'MVC'] ,
-         link: 'servletjsp.html'
+        link: 'servletjsp.html'
         
     },
 
@@ -40,7 +40,7 @@ const portfolioData = [
         description: 'Learn ORM mapping, HQL, caching, relationships, and JPA integration to manage databases efficiently with Hibernate.', 
         image: 'images/hibernate.png', 
         tech: ['ORM', 'HQL', 'JPA'] ,
-         link: 'hibernate.html'
+        link: 'hibernate.html'
     },
 
     { 
@@ -49,7 +49,7 @@ const portfolioData = [
         description: 'Understand IoC, Dependency Injection, Bean lifecycle, Autowiring, and Spring container configuration in depth.', 
         image: 'images/springcore.png', 
         tech: ['IoC', 'DI', 'Spring Beans'] ,
-         link: 'springcore.html'
+        link: 'springcore.html'
     },
 
     { 
@@ -58,7 +58,7 @@ const portfolioData = [
         description: 'Develop production-ready MVC web apps with controllers, view resolvers, form handling, validation, and REST integration.', 
         image: 'images/springmvc.png', 
         tech: ['Dispatcher', 'ViewResolver', 'MVC'] ,
-         link: 'springmvc.html'
+        link: 'springmvc.html'
     },
 
     { 
@@ -67,7 +67,7 @@ const portfolioData = [
         description: 'Create rapid production-ready applications with auto-configuration, embedded servers, and Spring Boot starters.', 
         image: 'images/springboot.png', 
         tech: ['RAD', 'Data JPA', 'REST API'] ,
-         link: 'springboot.html'
+        link: 'springboot.html'
     },
 
     { 
@@ -76,7 +76,7 @@ const portfolioData = [
         description: 'Implement authentication, authorization, JWT, custom filters, and secure your applications using Spring Security 5.7.', 
         image: 'images/springsecurity.png', 
         tech: ['JWT', 'Authentication'] ,
-         link: 'springsecurity.html'
+        link: 'springsecurity.html'
     },
 
     { 
@@ -85,7 +85,7 @@ const portfolioData = [
         description: 'Build clean RESTful services with HTTP methods, request validation, exception handling, and layered architecture.', 
         image: 'images/restapi.png', 
         tech: ['REST', 'JSON', 'HTTP'] ,
-         link: 'springrestapi.html'
+        link: 'springrestapi.html'
     },
 
     { 
@@ -94,7 +94,7 @@ const portfolioData = [
         description: 'Learn microservices architecture, API gateways, service discovery, communication patterns, and deployment strategies.', 
         image: 'images/microservices.png', 
         tech: ['Eureka', 'Feign', 'API Gateway'] ,
-         link: 'springmicroservices.html'
+        link: 'springmicroservices.html'
     },
 
     { 
@@ -103,7 +103,7 @@ const portfolioData = [
         description: 'Work on a fully integrated real-time Java project including backend, REST APIs, security, and database architecture.', 
         image: 'images/taxi.png', 
         tech: ['Spring Boot', 'MySQL', 'JWT'] ,
-         link: 'jdbc.html'
+        link: 'jdbc.html'
     }
 ];
 
@@ -178,8 +178,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const sections = document.querySelectorAll('section[id]');
     const navLinks = document.querySelectorAll('.nav-link');
 
-    // --- Carousel ---
+    // --- Carousel State & Logic ---
     let currentIndex = 0;
+    let autoRotateInterval;
+    let isDragging = false;
+    let startPos = 0;
+    let currentTranslate = 0;
+    let prevTranslate = 0;
+    const threshold = 50; // Minimum distance to swipe (in pixels)
 
     function createCarouselItem(data, index) {
         const item = document.createElement('div');
@@ -201,8 +207,98 @@ document.addEventListener('DOMContentLoaded', () => {
         return item;
     }
 
+    function updateCarousel() {
+        const items = document.querySelectorAll('.carousel-item');
+        const indicators = document.querySelectorAll('.indicator');
+        const totalItems = items.length;
+        const isMobile = window.innerWidth <= 768;
+        const isTablet = window.innerWidth <= 1024;
+        
+        items.forEach((item, index) => {
+            let offset = index - currentIndex;
+            // Handle wrap-around for the 3D effect
+            if (offset > totalItems / 2) offset -= totalItems;
+            else if (offset < -totalItems / 2) offset += totalItems;
+            
+            const absOffset = Math.abs(offset);
+            const sign = offset < 0 ? -1 : 1;
+
+            // Reset transition for smooth movement after swipe/click
+            item.style.transition = 'all 0.8s cubic-bezier(0.4, 0.0, 0.2, 1)';
+            item.style.pointerEvents = absOffset === 0 ? 'auto' : 'none'; // Only allow interaction with the center card
+
+            let spacing1 = 400, spacing2 = 600, spacing3 = 750;
+            if (isMobile) { spacing1 = 280; spacing2 = 420; spacing3 = 550; }
+            else if (isTablet) { spacing1 = 340; spacing2 = 520; spacing3 = 650; }
+
+            // Apply 3D transformation based on offset
+            let transformStyle = '';
+            let opacity = 0;
+            let zIndex = 1;
+
+            if (absOffset === 0) {
+                transformStyle = 'translate(-50%, -50%) translateZ(0) scale(1)';
+                opacity = 1;
+                zIndex = 10;
+            } else if (absOffset === 1) {
+                const translateX = sign * spacing1;
+                const rotation = isMobile ? 25 : 30;
+                const scale = isMobile ? 0.88 : 0.85;
+                transformStyle = `translate(-50%, -50%) translateX(${translateX}px) translateZ(-200px) rotateY(${-sign * rotation}deg) scale(${scale})`;
+                opacity = 0.8;
+                zIndex = 5;
+            } else if (absOffset === 2) {
+                const translateX = sign * spacing2;
+                const rotation = isMobile ? 35 : 40;
+                const scale = isMobile ? 0.75 : 0.7;
+                transformStyle = `translate(-50%, -50%) translateX(${translateX}px) translateZ(-350px) rotateY(${-sign * rotation}deg) scale(${scale})`;
+                opacity = 0.5;
+                zIndex = 3;
+            } else if (absOffset === 3) {
+                const translateX = sign * spacing3;
+                const rotation = isMobile ? 40 : 45;
+                const scale = isMobile ? 0.65 : 0.6;
+                transformStyle = `translate(-50%, -50%) translateX(${translateX}px) translateZ(-450px) rotateY(${-sign * rotation}deg) scale(${scale})`;
+                opacity = 0.3;
+                zIndex = 2;
+            } else {
+                transformStyle = 'translate(-50%, -50%) translateZ(-500px) scale(0.5)';
+                opacity = 0;
+                zIndex = 1;
+            }
+            
+            item.style.transform = transformStyle;
+            item.style.opacity = opacity;
+            item.style.zIndex = zIndex;
+        });
+
+        indicators.forEach((indicator, index) => {
+            indicator.classList.toggle('active', index === currentIndex);
+        });
+    }
+
+    function nextSlide() { currentIndex = (currentIndex + 1) % portfolioData.length; updateCarousel(); }
+    function prevSlide() { currentIndex = (currentIndex - 1 + portfolioData.length) % portfolioData.length; updateCarousel(); }
+    function goToSlide(index) { 
+        if (index === currentIndex) return; // Prevent unnecessary update
+        currentIndex = index; 
+        updateCarousel(); 
+        resetAutoRotate(); // Reset timer on manual interaction
+    }
+
+    function startAutoRotate() {
+        if (autoRotateInterval) clearInterval(autoRotateInterval);
+        autoRotateInterval = setInterval(nextSlide, 5000);
+    }
+    
+    function resetAutoRotate() {
+        if (autoRotateInterval) clearInterval(autoRotateInterval);
+        startAutoRotate();
+    }
+
     function initCarousel() {
         if (!carousel || !indicatorsContainer) return;
+        
         // clear existing
         carousel.innerHTML = '';
         indicatorsContainer.innerHTML = '';
@@ -219,71 +315,96 @@ document.addEventListener('DOMContentLoaded', () => {
             indicatorsContainer.appendChild(indicator);
         });
 
+        // Initialize swipe listeners on the carousel itself
+        addCarouselSwipeListeners(carousel);
+        
         updateCarousel();
+        startAutoRotate(); // Start auto-rotation
     }
 
-    function updateCarousel() {
-        const items = document.querySelectorAll('.carousel-item');
-        const indicators = document.querySelectorAll('.indicator');
-        const totalItems = items.length;
-        const isMobile = window.innerWidth <= 768;
-        const isTablet = window.innerWidth <= 1024;
-        items.forEach((item, index) => {
-            let offset = index - currentIndex;
-            if (offset > totalItems / 2) offset -= totalItems;
-            else if (offset < -totalItems / 2) offset += totalItems;
-            const absOffset = Math.abs(offset);
-            const sign = offset < 0 ? -1 : 1;
+    // --- Swipe/Drag Logic ---
+    
+    function getPositionX(event) {
+        // Use touch events for mobile, mouse/pointer events for desktop
+        return event.type.includes('touch') ? event.touches[0].clientX : event.clientX;
+    }
 
-            item.style.transform = '';
-            item.style.opacity = '';
-            item.style.zIndex = '';
-            item.style.transition = 'all 0.8s cubic-bezier(0.4, 0.0, 0.2, 1)';
+    function dragStart(event) {
+        // Only allow dragging on the main carousel area, not on buttons/links inside cards
+        if (event.target.closest('.card-cta') || event.target.tagName === 'A' || event.button !== 0) return;
 
-            let spacing1 = 400, spacing2 = 600, spacing3 = 750;
-            if (isMobile) { spacing1 = 280; spacing2 = 420; spacing3 = 550; }
-            else if (isTablet) { spacing1 = 340; spacing2 = 520; spacing3 = 650; }
+        isDragging = true;
+        startPos = getPositionX(event);
+        carousel.classList.add('dragging');
 
-            if (absOffset === 0) {
-                item.style.transform = 'translate(-50%, -50%) translateZ(0) scale(1)';
-                item.style.opacity = '1';
-                item.style.zIndex = '10';
-            } else if (absOffset === 1) {
-                const translateX = sign * spacing1;
-                const rotation = isMobile ? 25 : 30;
-                const scale = isMobile ? 0.88 : 0.85;
-                item.style.transform = `translate(-50%, -50%) translateX(${translateX}px) translateZ(-200px) rotateY(${-sign * rotation}deg) scale(${scale})`;
-                item.style.opacity = '0.8';
-                item.style.zIndex = '5';
-            } else if (absOffset === 2) {
-                const translateX = sign * spacing2;
-                const rotation = isMobile ? 35 : 40;
-                const scale = isMobile ? 0.75 : 0.7;
-                item.style.transform = `translate(-50%, -50%) translateX(${translateX}px) translateZ(-350px) rotateY(${-sign * rotation}deg) scale(${scale})`;
-                item.style.opacity = '0.5';
-                item.style.zIndex = '3';
-            } else if (absOffset === 3) {
-                const translateX = sign * spacing3;
-                const rotation = isMobile ? 40 : 45;
-                const scale = isMobile ? 0.65 : 0.6;
-                item.style.transform = `translate(-50%, -50%) translateX(${translateX}px) translateZ(-450px) rotateY(${-sign * rotation}deg) scale(${scale})`;
-                item.style.opacity = '0.3';
-                item.style.zIndex = '2';
-            } else {
-                item.style.transform = 'translate(-50%, -50%) translateZ(-500px) scale(0.5)';
-                item.style.opacity = '0';
-                item.style.zIndex = '1';
-            }
-        });
-
-        indicators.forEach((indicator, index) => {
-            indicator.classList.toggle('active', index === currentIndex);
+        // Stop auto-rotate when dragging starts
+        if (autoRotateInterval) clearInterval(autoRotateInterval);
+        
+        // Apply no transition during drag for smooth, immediate movement
+        document.querySelectorAll('.carousel-item').forEach(item => {
+            item.style.transition = 'none';
         });
     }
 
-    function nextSlide() { currentIndex = (currentIndex + 1) % portfolioData.length; updateCarousel(); }
-    function prevSlide() { currentIndex = (currentIndex - 1 + portfolioData.length) % portfolioData.length; updateCarousel(); }
-    function goToSlide(index) { currentIndex = index; updateCarousel(); }
+    function dragging(event) {
+        if (!isDragging) return;
+
+        const currentPos = getPositionX(event);
+        currentTranslate = currentPos - startPos;
+
+        // Apply a temporary translation for visual feedback (this overrrides the 3D position temporarily)
+        // Only apply a small drag factor to make it feel like 3D movement
+        const dragFactor = 0.3; 
+        document.querySelectorAll('.carousel-item').forEach(item => {
+            const tempX = currentTranslate * dragFactor;
+            // Get current transform for item
+            const currentTransform = item.style.transform;
+            // Apply the drag *relative* to the item's original 3D position
+            item.style.transform = currentTransform + ` translateX(${tempX}px)`;
+        });
+    }
+
+    function dragEnd(event) {
+        if (!isDragging) return;
+        isDragging = false;
+        carousel.classList.remove('dragging');
+
+        const movedBy = currentTranslate;
+        
+        // Snap logic: if moved more than the threshold, move to the next/prev slide
+        if (movedBy < -threshold) {
+            nextSlide(); // Swiped left
+        } else if (movedBy > threshold) {
+            prevSlide(); // Swiped right
+        } else {
+            // Revert to original position if not enough swipe
+            updateCarousel(); 
+        }
+
+        // Cleanup temporary styles and reset state
+        currentTranslate = 0;
+        prevTranslate = 0;
+        
+        // Restart auto-rotate after drag ends
+        startAutoRotate();
+    }
+
+    function addCarouselSwipeListeners(element) {
+        // Disable image dragging default browser behavior
+        element.ondragstart = () => false; 
+
+        // Touch events (for mobile/tablet)
+        element.addEventListener('touchstart', dragStart, { passive: true });
+        element.addEventListener('touchmove', dragging, { passive: true });
+        element.addEventListener('touchend', dragEnd);
+
+        // Mouse events (for desktop dragging)
+        element.addEventListener('mousedown', dragStart);
+        element.addEventListener('mousemove', dragging);
+        element.addEventListener('mouseup', dragEnd);
+        element.addEventListener('mouseleave', dragEnd); // End drag if mouse leaves container
+    }
+
 
     // --- Skills grid initialization (unchanged logic but safe) ---
     function initSkillsGrid() {
@@ -329,13 +450,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (nextBtn) nextBtn.addEventListener('click', nextSlide);
     if (prevBtn) prevBtn.addEventListener('click', prevSlide);
 
-    // Auto-rotate carousel
-    setInterval(nextSlide, 5000);
-
     // Keyboard navigation
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowLeft') prevSlide();
-        if (e.key === 'ArrowRight') nextSlide();
+        if (e.key === 'ArrowLeft') { prevSlide(); resetAutoRotate(); }
+        if (e.key === 'ArrowRight') { nextSlide(); resetAutoRotate(); }
     });
 
     // Resize handler
@@ -349,6 +467,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initCarousel();
     initParticles();
     // initSkillsGrid(); // uncomment if you want skills grid active
+    
     // safe menu toggle
     if (menuToggle && navMenu) {
         menuToggle.addEventListener('click', () => {
@@ -401,7 +520,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Stats IntersectionObserver & fallback (mobile-friendly) ---
     const observerOptions = {
-        threshold: 0.1,                 // lower threshold for mobile
+        threshold: 0.1,             // lower threshold for mobile
         rootMargin: '0px 0px -50px 0px' // trigger a bit earlier
     };
 
@@ -438,16 +557,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Optional: immediate mobile-only trigger (uncomment if you prefer instant on phones)
-    // if (window.innerWidth < 768) {
-    //     document.querySelectorAll('.stat-number').forEach(number => {
-    //         if (!number.classList.contains('animated')) {
-    //             number.classList.add('animated');
-    //             animateCounter(number);
-    //         }
-    //     });
-    // }
-
     // --- Contact form handler ---
     const contactForm = document.getElementById('contactForm');
     if (contactForm) {
@@ -474,4 +583,3 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 }); // end DOMContentLoaded
-
